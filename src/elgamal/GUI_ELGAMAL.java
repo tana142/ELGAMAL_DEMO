@@ -6,7 +6,9 @@
 package elgamal;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Random;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -14,7 +16,10 @@ import java.util.Random;
  */
 public class GUI_ELGAMAL extends java.awt.Frame {
 
-    public ArrayList<Integer> arr_ban_ma ;
+    public ArrayList<Integer> arr_ban_ma;
+    int max = 39367, min = 255;
+    int k;
+
     /**
      * Creates new form GUI_ELGAMAL
      */
@@ -106,6 +111,7 @@ public class GUI_ELGAMAL extends java.awt.Frame {
 
         txt_banro2.setEditable(false);
         txt_banro2.setColumns(20);
+        txt_banro2.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         txt_banro2.setLineWrap(true);
         txt_banro2.setRows(5);
         txt_banro2.setName("txt_banro2"); // NOI18N
@@ -131,6 +137,7 @@ public class GUI_ELGAMAL extends java.awt.Frame {
         });
         add(btn_generation, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 60, -1, 20));
 
+        txt_banro1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         txt_banro1.setLineWrap(true);
         txt_banro1.setRows(5);
         txt_banro1.setName("txt_banro1"); // NOI18N
@@ -138,7 +145,6 @@ public class GUI_ELGAMAL extends java.awt.Frame {
 
         add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 110, 310, 100));
 
-        txt_banma2.setEditable(false);
         txt_banma2.setColumns(20);
         txt_banma2.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         txt_banma2.setLineWrap(true);
@@ -159,6 +165,7 @@ public class GUI_ELGAMAL extends java.awt.Frame {
         add(btn_encrypt, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 230, 100, 40));
 
         txt_alpha.setEditable(false);
+        txt_alpha.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         txt_alpha.setName("txt_alpha"); // NOI18N
         add(txt_alpha, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 60, 80, 20));
 
@@ -193,7 +200,7 @@ public class GUI_ELGAMAL extends java.awt.Frame {
     }//GEN-LAST:event_exitForm
 
     //check so nguyen to
-    public boolean CheckSNT(int n){
+    public boolean CheckSNT(int n) {
         // so nguyen n < 2 khong phai la so nguyen to
         if (n < 2) {
             return false;
@@ -206,70 +213,90 @@ public class GUI_ELGAMAL extends java.awt.Frame {
         }
         return true;
     }
-    
+
     private void btn_generationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_generationActionPerformed
         // TODO add your handling code here:
-        int max = 33337 , min = 5;
+        
         int p, a, alpha, beta;
         Random genaration = new Random();
-        do{
-            p = genaration.nextInt((max - min)+1) + min;
-        }while(CheckSNT(p)== false || p <= 2);
-        
+        do {
+            p = genaration.nextInt((max)) + min;
+        } while (CheckSNT(p) == false ); // hoac p<= 2 || p <= 2
+
         txt_p1.setText("" + p);
         txt_p2.setText("" + p);
         //set a
-        a = genaration.nextInt((p - 2) + 1) + 2;
-        txt_a.setText(""+a);
+        a = genaration.nextInt((p - 2) -2) + 2;
+        txt_a.setText("" + a);
         //set alpha
-        alpha = genaration.nextInt((p - 1) + 1) + 1;
-        txt_alpha.setText(""+alpha);
+        alpha = genaration.nextInt((p - 1) - 1) + 1;
+        txt_alpha.setText("" + alpha);
         //set beta
-        beta = BinhPhuongNhan(alpha,a,p);
-        txt_beta.setText(""+beta);
-        
+        beta = BinhPhuongNhan(alpha, a, p);
+        txt_beta.setText("" + beta);
+
+        k = genaration.nextInt((p - 2)) +1;
+        System.out.println("k " +k);
+
     }//GEN-LAST:event_btn_generationActionPerformed
 
     private void btn_encryptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_encryptActionPerformed
-
+        try{
+            if(txt_p1.getText().length() ==0 ||
+                    txt_alpha.getText().length() ==0 ||
+                    txt_beta.getText().length() ==0 ||
+                    txt_a.getText().length() ==0){
+                JOptionPane.showMessageDialog(this,
+                "Bạn chưa Genenation key!",
+                "Thông báo",
+                JOptionPane.OK_OPTION);
+                return;
+            }
+            if(txt_banro1.getText().length() == 0){
+                JOptionPane.showMessageDialog(this,
+                "Hãy nhập thông tin cần mã hóa trước !",
+                "Thông báo",
+                JOptionPane.OK_OPTION);
+                return;
+            }
         arr_ban_ma = new ArrayList<>();
         txt_banma1.setText("");
         txt_banma2.setText("");
         txt_banro2.setText("");
-        // TODO add your handling code here:
-        Random genaration = new Random();
         int p = Integer.valueOf(txt_p1.getText());
         int alpha = Integer.valueOf(txt_alpha.getText());
-        int k = genaration.nextInt((p-2) + 1);
         int beta = Integer.valueOf(txt_beta.getText());
-        int y1 = BinhPhuongNhan(alpha, k, p);
-        int y2;
+        //lay ban ro tu text field ban ro
         String ban_ro = txt_banro1.getText();
+        int[] ro1 = new int[ban_ro.length()];
+        //chuyen ban ro tu string sang mang int
+        for (int i = 0; i < ban_ro.length(); i++) {
+            ro1[i] = (int) ban_ro.charAt(i);
+        }
+        int[] ma = new int[ro1.length];
+        // ma hoa voi mang int(ban ro)
+        for (int i = 0; i < ro1.length; i++) {
+            ma[i] = ((ban_ro.charAt(i) * BinhPhuongNhan(beta, k, p)) % p);
+        }
         String ban_ma = "";
-        
-        int i = 0;
-        while(i < ban_ro.length()){
-            arr_ban_ma.add(y1);
-            y2 = ((ban_ro.charAt(i)*BinhPhuongNhan(beta, k, p))% p);
-            arr_ban_ma.add(y2);
-            i++;
+        // chuyen mang int(ban ma) sang sting
+        for (int i = 0; i < ma.length; i++) {
+            ban_ma += (char) ma[i];
         }
-        
-        //chuoi ma hoa dang so
-//        for (Integer in : arr_ban_ma) {
-//            ban_ma += in;
-//        }
-//        
+        // chuyen string ban ma sang byte
+        byte[] b1 = ban_ma.getBytes();
+        // chuyen byte ban ma sang string dang base64
+        String ban_ma1 = Base64.getEncoder().encodeToString(b1);
+        //dua ban ma vao text field ban ma 1
+        txt_banma1.setText(ban_ma1);
+        } 
+        catch(Exception e ){
+            JOptionPane.showMessageDialog(this,
+                "Bạn chưa Genenation key!",
+                "Thông báo",
+                JOptionPane.OK_OPTION);
+        }
 
-        // chuoi ma hoa dang chu
-        for(int j = 0; j< arr_ban_ma.size(); j++){
-            ban_ma += (char) (arr_ban_ma.get(j) % p % 26 + 65);
-        }
-        txt_banma1.setText(ban_ma);
-        
-        // e y1= alpha ^k  mod p
-        // e y2 = x* beta^k mod p
-        
     }//GEN-LAST:event_btn_encryptActionPerformed
 
     private void btn_clearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_clearActionPerformed
@@ -283,37 +310,79 @@ public class GUI_ELGAMAL extends java.awt.Frame {
         txt_banro2.setText("");
         txt_banma1.setText("");
         txt_banma2.setText("");
-        
+
     }//GEN-LAST:event_btn_clearActionPerformed
 
     private void btn_receiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_receiveActionPerformed
         // TODO add your handling code here:
-       txt_banma2.setText(txt_banma1.getText());
+        if(txt_banma1.getText().length() == 0){
+            JOptionPane.showMessageDialog(this,
+                "Không có bản mã nào!",
+                "Thông báo",
+                JOptionPane.OK_OPTION);
+                return;
+        }
+        txt_banma2.setText(txt_banma1.getText());
     }//GEN-LAST:event_btn_receiveActionPerformed
 
     private void btn_decryptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_decryptActionPerformed
         // TODO add your handling code here:
+        try{
+            if(txt_banma2.getText().length() == 0){
+                JOptionPane.showMessageDialog(this,
+                "Không có thông tin cần giải mã!",
+                "Thông báo",
+                JOptionPane.OK_OPTION);
+                return;
+            }
         int p = Integer.valueOf(txt_p1.getText());
         int a = Integer.valueOf(txt_a.getText());
-        int k = p - a- 1;
-        int y1 = BinhPhuongNhan(arr_ban_ma.get(0), k, p);
-        String ban_ro = "";
+        int alpha = Integer.valueOf(txt_alpha.getText());
         
-        for(int i = 1; i< arr_ban_ma.size() ; i += 2){
-            ban_ro += (char)((arr_ban_ma.get(i) * y1) % p);
+        // lay ban ma tu text field ban ma 2
+        String ban_ma = txt_banma2.getText();
+        //chuyen ban ma tu String  base 64 -> byte
+        byte[] bma1 = Base64.getDecoder().decode(ban_ma);
+        // chuyen ban ma dang byte -> String
+        String s1 = new String(bma1);
+        int[] ma1 = new int[s1.length()];
+        //Chuyen ban ma String -> mang int
+        for (int i = 0; i < s1.length(); i++) {
+            ma1[i] = (int) s1.charAt(i);
         }
-        txt_banro2.setText(ban_ro);
+        // khoi tao y1
+        int so_y1 = BinhPhuongNhan(BinhPhuongNhan(alpha, k, p), p - 1 - a, p);
         
+        int[] ma2 = new int[ma1.length];
+        // tien hanh giai ma ban ma -> ban ro  dang mang int
+        for (int i = 0; i < ma1.length; i++) {
+            ma2[i] = (ma1[i] * so_y1) % p;
+        }
+        String ban_ro = "";
+        // chuyen ban ro mang int-> String
+        for (int i = 0; i < ma2.length; i++) {
+            ban_ro += (char) ma2[i];
+        }
+        //dua ban ro vao text field ban ro 2
+        txt_banro2.setText(ban_ro);
+        }
+        catch(Exception e){
+            JOptionPane.showMessageDialog(this,
+                "Giải mã thất bại",
+                "Thông báo",
+                JOptionPane.OK_OPTION);
+        }
+
     }//GEN-LAST:event_btn_decryptActionPerformed
 
-    public int BinhPhuongNhan(int alpha,int a, int p){
+    public int BinhPhuongNhan(int alpha, int a, int p) {
         int ketqua = 1, n = p, x = alpha;
-        String k =  Integer.toBinaryString(a);//chuyen sang nhi phan
+        String k = Integer.toBinaryString(a);//chuyen sang nhi phan
         int i = 0;
-        while(i < k.length()){
+        while (i < k.length()) {
             ketqua *= ketqua;
             ketqua %= n;
-            if(k.charAt(i) == '1'){
+            if (k.charAt(i) == '1') {
                 ketqua *= x;
             }
             ketqua %= n;
@@ -321,6 +390,7 @@ public class GUI_ELGAMAL extends java.awt.Frame {
         }
         return ketqua;
     }
+
     /**
      * @param args the command line arguments
      */
